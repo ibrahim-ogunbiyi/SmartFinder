@@ -147,7 +147,7 @@ if st.session_state.keywords and word_or_phrase and st.session_state.encoding is
         
         pdf_temp = tempfile.NamedTemporaryFile(suffix=".pdf")
         with open(pdf_temp.name, "wb") as f:
-            f.write(base64.b64encode(pdf_data))
+            f.write(pdf_data)
         # Embedding PDF in HTML
         pdf_display = F'<iframe src="{pdf_temp.name}#page={page_containing[0]}&zoom=90%" width="100%" height="1000" type="application/pdf"></iframe>'
         # Displaying File

@@ -144,10 +144,13 @@ if st.session_state.keywords and word_or_phrase and st.session_state.encoding is
             pdf_data, page_containing = annotate_pdf(pdf_document)
             
         st.success(f"The word '{st.session_state.keywords[max_index]}' occur(s) on pages {', '.join(map(str, page_containing))}. You can scroll to these pages.")
-
+        
+        pdf_temp = tempfile.NamedTemporaryFile(suffix=".pdf")
+        with open(pdf_temp.name, "wb") as f:
+            f.write(base64.b64encode(pdf_data))
         # Embedding PDF in HTML
-        pdf_display = F'<iframe src="data:application/pdf;base64,{pdf_data}#page={page_containing[0]}&zoom=90%" width="100%" height="1000" type="application/pdf"></iframe>'
+        pdf_display = F'<iframe src="{pdf_temp.name}#page={page_containing[0]}&zoom=90%" width="100%" height="1000" type="application/pdf"></iframe>'
         # Displaying File
         st.markdown(pdf_display, unsafe_allow_html=True)
-
+        pdf_temp.close()
     

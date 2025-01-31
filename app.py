@@ -6,16 +6,12 @@ import fitz
 import numpy as np
 from PIL import Image
 import PyPDF2
-from win32com.client import Dispatch
-import pythoncom
 import tempfile
 from keybert import KeyBERT
 from docx import Document
-from docx2pdf import convert
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+
 
 # Load models once
 keybert_model = KeyBERT(model=r"sentence_transformer\model")

@@ -14,8 +14,8 @@ from sentence_transformers.util import cos_sim
 
 
 # Load models once
-keybert_model = KeyBERT(model=r"sentence_transformer\model")
-embedding_model = SentenceTransformer(model_name_or_path=r"sentence_transformer\model")
+keybert_model = KeyBERT(model=r"sentence_transformer/model")
+embedding_model = SentenceTransformer(model_name_or_path=r"sentence_transformer/model")
 
 # Initialize session state
 if "text" not in st.session_state:

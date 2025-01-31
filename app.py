@@ -8,15 +8,18 @@ from PIL import Image
 import PyPDF2
 from win32com.client import Dispatch
 import pythoncom
+import tempfile
 from keybert import KeyBERT
 from docx import Document
+from docx2pdf import convert
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
-from docx2pdf import convert
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # Load models once
-keybert_model = KeyBERT(model="C:/Users/admin/Documents/ML_PROJECT/KeySim Project/sentence_transformer/model")
-embedding_model = SentenceTransformer(model_name_or_path="C:/Users/admin/Documents/ML_PROJECT/KeySim Project/sentence_transformer/model")
+keybert_model = KeyBERT(model=r"sentence_transformer\model")
+embedding_model = SentenceTransformer(model_name_or_path=r"sentence_transformer\model")
 
 # Initialize session state
 if "text" not in st.session_state:
@@ -28,47 +31,29 @@ if "keywords" not in st.session_state:
 if "encoding" not in st.session_state:
     st.session_state.encoding= None
 
-def convert_fn(input_path, output_path):
-    pythoncom.CoInitialize()
-    try:
-        word = Dispatch("Word.Application")
-        doc = word.Documents.Open(input_path)
-        doc.SaveAs(output_path, FileFormat=17)  # FileFormat 17 = PDF
-        doc.Close()
-        word.Quit()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        pythoncom.CoUninitialize()
+
+
 
 def convert_word_to_pdf(word_doc_io):
-    # path to pdf_file
-    temp_pdf_path = "temp_pdf.pdf"
-    # path to word_doc
-    temp_word_path = "temp_word.docx"
-    
-    # store the word document previously
-    #  in memory to file for conversion
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_word_file:
+            temp_word_path = temp_word_file.name
 
-    with open(temp_word_path, "wb") as file:
-        file.write(word_doc_io.getvalue())
+        with open(temp_word_path, "wb") as word_writer:
+            word_writer.write(io.BytesIO(word_doc_io).read())
 
-    pythoncom.CoInitialize()
-    # convert word document to pdf
-    convert(temp_word_path, temp_pdf_path)
+        temp_pdf_path = temp_word_path.replace("docx", "pdf")   
+        
+        with open(temp_pdf_path, "rb") as pdf_file:
+            pdf_object = io.BytesIO(pdf_file.read())
 
-    pythoncom.CoUninitialize()
-
-    # read the pdf file as io object.
-    with open(temp_pdf_path, "rb") as file_object:
-        pdf_object = io.BytesIO(file_object.read())
-    
-    # read the files
-    os.remove(temp_pdf_path)
-    os.remove(temp_word_path)
-    
-    return pdf_object
-
+        
+    finally:
+        if os.path.exists(temp_word_path):
+            os.remove(temp_word_path)
+        if os.path.exists(temp_pdf_path):
+            os.remove(temp_pdf_path)
+        return pdf_object
 
 def reset_keywords():
     st.session_state.keywords = []
